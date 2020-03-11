@@ -1,8 +1,38 @@
 #note the compile for below needs to be pointed in the right direction
-LDFLAGS = -Wl,-rpath,/usr/local/lib /usr/local/lib/libgrpc++_unsecure.a /usr/local/lib64/libprotobuf.a -lpthread /usr/local/lib/libgrpc_unsecure.a /usr/local/lib/libgpr.a /usr/local/lib/libz.so /usr/local/lib/libcares.so.2.3.0 -lnsl /usr/local/lib/libaddress_sorting.a -ldl -lrt -lm 
+LDFLAGS = -Wl,-rpath,/usr/lib \
+ $(CURDIR)/../../cmake/build/libgrpc++_unsecure.a\
+ $(CURDIR)/../../cmake/build/libgrpc.a\
+ $(CURDIR)/../../cmake/build/libupb.a\
+ /usr/lib/libprotobuf.a\
+ -lpthread $(CURDIR)/../../cmake/build/libgrpc_unsecure.a\
+ $(CURDIR)/../../cmake/build/libgpr.a\
+ $(CURDIR)/../../cmake/build/third_party/cares/cares/lib/libcares.a\
+ $(CURDIR)/../../cmake/build/libgrpc_plugin_support.a\
+ $(CURDIR)/../../cmake/build/third_party/boringssl-with-bazel/libssl.a\
+ $(CURDIR)/../../cmake/build/third_party/boringssl-with-bazel/libcrypto.a\
+ $(CURDIR)/../../cmake/build/third_party/zlib/libz.a\
+ $(CURDIR)/../../cmake/build/third_party/abseil-cpp/absl/strings/libabsl_strings.a\
+ $(CURDIR)/../../cmake/build/third_party/abseil-cpp/absl/base/libabsl_base.a\
+ $(CURDIR)/../../cmake/build/third_party/abseil-cpp/absl/base/libabsl_throw_delegate.a\
+ $(CURDIR)/../../cmake/build/third_party/abseil-cpp/absl/base/libabsl_log_severity.a\
+ $(CURDIR)/../../cmake/build/third_party/abseil-cpp/absl/base/libabsl_raw_logging_internal.a\
+ $(CURDIR)/../../cmake/build/third_party/abseil-cpp/absl/hash/libabsl_hash.a\
+ $(CURDIR)/../../cmake/build/third_party/abseil-cpp/absl/time/libabsl_time.a\
+ $(CURDIR)/../../cmake/build/third_party/abseil-cpp/absl/time/libabsl_civil_time.a\
+ $(CURDIR)/../../cmake/build/third_party/abseil-cpp/absl/time/libabsl_time_zone.a\
+ $(CURDIR)/../../cmake/build/third_party/abseil-cpp/absl/strings/libabsl_str_format_internal.a\
+ $(CURDIR)/../../cmake/build/third_party/abseil-cpp/absl/strings/libabsl_strings_internal.a\
+ $(CURDIR)/../../cmake/build/third_party/abseil-cpp/absl/types/libabsl_bad_optional_access.a\
+ $(CURDIR)/../../cmake/build/third_party/abseil-cpp/absl/types/libabsl_bad_any_cast_impl.a\
+ $(CURDIR)/../../cmake/build/third_party/abseil-cpp/absl/types/libabsl_bad_variant_access.a\
+ $(CURDIR)/../../cmake/build/third_party/abseil-cpp/absl/numeric/libabsl_int128.a\
+ -lnsl $(CURDIR)/../../cmake/build/libaddress_sorting.a\
+ -ldl -lrt -lm -lssl
+#/usr/local/lib/libgrpc++_unsecure.a /usr/local/lib64/libprotobuf.a -lpthread /usr/local/lib/libgrpc_unsecure.a /usr/local/lib/libgpr.a /usr/local/lib/libz.so /usr/local/lib/libcares.so.2.3.0 -lnsl /usr/local/lib/libaddress_sorting.a -ldl -lrt -lm 
+
 
 CXX = g++
-CPPFLAGS += `pkg-config --cflags protobuf grpc`
+CPPFLAGS += `pkg-config --cflags protobuf grpc` -I$(CURDIR)/../../include
 CXXFLAGS += -std=c++11
 
 GRPC_CPP_PLUGIN = grpc_cpp_plugin

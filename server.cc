@@ -85,7 +85,7 @@ class GRPCServiceImplementation final : public nvidia::inferenceserver::GRPCServ
 };
 
 void Run() {
-  std::string address("0.0.0.0:8001");
+  std::string address("0.0.0.0:8443");
   GRPCServiceImplementation service;
 
   ServerBuilder builder;
