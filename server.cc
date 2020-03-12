@@ -50,6 +50,7 @@ class GRPCServiceImplementation final : public nvidia::inferenceserver::GRPCServ
 		     StatusResponse* reply
 		     ) override {
 
+    std::cout<<"In Status"<<std::endl;
     auto server_status = reply->mutable_server_status();
     server_status->set_id("inference:0");
     auto& model_status  = *server_status->mutable_model_status();
@@ -77,6 +78,7 @@ class GRPCServiceImplementation final : public nvidia::inferenceserver::GRPCServ
 		     InferResponse* reply
 		     ) override {
     
+    std::cout<<"In Infer"<<std::endl;
     const std::string& raw = request->raw_input(0);
     const void* lVals = raw.c_str();
     float* lFVals = (float*) lVals;
@@ -96,6 +98,7 @@ class GRPCServiceImplementation final : public nvidia::inferenceserver::GRPCServ
 
     std::copy(lFVals,lFVals+batch_size*DATA_SIZE_IN,source_in.begin());
 
+    std::cout<<source_in[0]<<std::endl;
     // Copy input data to device global memory
     q.enqueueMigrateMemObjects(inBufVec,0/* 0 means from host*/);
     // Launch the Kernel
@@ -107,6 +110,7 @@ class GRPCServiceImplementation final : public nvidia::inferenceserver::GRPCServ
     // Check for any errors from the command queue
     q.finish();
     
+    std::cout<<source_hw_results[0]<<std::endl;
     std::string *outputs1 = reply->add_raw_output();
     float* lTVals = new float[batch_size];
     std::copy(source_hw_results.begin(), source_hw_results.begin()+batch_size*DATA_SIZE_OUT, lTVals);
