@@ -44,8 +44,8 @@ class GRPCServiceImplementation final : public nvidia::inferenceserver::GRPCServ
   cl::CommandQueue q;
 
  private: 
-  std::vector<cl::Event>   waitInput_;//m_Mem2FpgaEvents;                                                                                                                                                                                    
-  std::vector<cl::Event>   waitOutput_;//m_ExeKernelEvents;                                                                                                                                                                                  
+  std::vector<cl::Event>   waitInput_;//m_Mem2FpgaEvents;                                                                                                                                                                                 
+  std::vector<cl::Event>   waitOutput_;//m_ExeKernelEvents;                                                                                                                                                                               
 
   grpc::Status Status(
 		     ServerContext* context, 
@@ -78,7 +78,6 @@ class GRPCServiceImplementation final : public nvidia::inferenceserver::GRPCServ
 		     const InferRequest* request, 
 		     InferResponse* reply
 		     ) override {
-    std::cout << " infer " << std::endl;
     auto t0 = Clock::now();
     const std::string& raw = request->raw_input(0);
     const void* lVals = raw.c_str();
@@ -98,38 +97,38 @@ class GRPCServiceImplementation final : public nvidia::inferenceserver::GRPCServ
     output1->mutable_raw()->set_batch_byte_size(2*sizeof(data_t)*batch_size);
 
     memcpy(source_in.data(), &lFVals[0], batch_size*sizeof(bigdata_t));
-    auto t1a = Clock::now();
-    cl::Event l_event_in;                                                                                                                                                                                                                  
-    q.enqueueMigrateMemObjects(inBufVec,0/* 0 means from host*/,NULL,&l_event_in);                                                                                                                                                         
-    //q.enqueueMigrateMemObjects(inBufVec,0/* 0 means from host*/);
-    auto t1b = Clock::now();
-    cl::Event l_event;                                                                                                                                                                                                                  
-    q.enqueueTask(krnl_xil,&(waitInput_),&l_event);  
-    //q.enqueueTask(krnl_xil);
-    auto t1c = Clock::now();
+    //auto t1 = Clock::now();
+    //auto t1a = Clock::now();
+    //cl::Event l_event_in;                                                                                                                                                                                                                  
+    //q.enqueueMigrateMemObjects(inBufVec,0/* 0 means from host*/,NULL,&l_event_in);                                                                                                                                                         
+    q.enqueueMigrateMemObjects(inBufVec,0/* 0 means from host*/);
+    //waitInput_.push_back(l_event_in);
+    //auto t1b = Clock::now();
+    //cl::Event l_event;                                                                                                                                                                                                                  
+    //q.enqueueTask(krnl_xil,&(waitInput_),&l_event);  
+    //waitOutput_.push_back(l_event);
+    q.enqueueTask(krnl_xil);
+    //auto t1c = Clock::now();
     cl::Event l_event_out;                                                                                                                                                                                                                 
-    q.enqueueMigrateMemObjects(outBufVec,CL_MIGRATE_MEM_OBJECT_HOST,&waitOutput_,&l_event_out);  
-    //q.enqueueMigrateMemObjects(outBufVec,CL_MIGRATE_MEM_OBJECT_HOST);
-    l_event_out.wait();
-    auto t1 = Clock::now();
+    //q.enqueueMigrateMemObjects(outBufVec,CL_MIGRATE_MEM_OBJECT_HOST,&waitOutput_,&l_event_out);  
+    q.enqueueMigrateMemObjects(outBufVec,CL_MIGRATE_MEM_OBJECT_HOST);
     q.finish();
+    //l_event_out.wait();
     //clFinish(q.get());
-    auto t2 = Clock::now();
-    //std::cout << "FPGA time: " << std::chrono::duration_cast<std::chrono::nanoseconds>(t2 - t1).count() << " ns" << batch_size << std::endl;
+    //auto t2 = Clock::now();
 
-    //std::cout<<source_hw_results[0]<<std::endl;
     std::string *outputs1 = reply->add_raw_output();
     char* lTVals = new char[batch_size*sizeof(data_t)];//2*batch_size*sizeof(data_t)];
     memcpy(&lTVals[0], source_hw_results.data(), batch_size*sizeof(data_t));
     outputs1->append(lTVals,(batch_size)*sizeof(data_t));
     auto t3 = Clock::now();
-    std::cout << "Total time: " << std::chrono::duration_cast<std::chrono::nanoseconds>(t3 - t0).count() << " ns" << std::endl;
-    std::cout << "   T1 time: " << std::chrono::duration_cast<std::chrono::nanoseconds>(t1 - t0).count() << " ns" << std::endl;
-    std::cout << "   T2 time: " << std::chrono::duration_cast<std::chrono::nanoseconds>(t3 - t2).count() << " ns" << std::endl;
-    std::cout << " FPGA time: " << std::chrono::duration_cast<std::chrono::nanoseconds>(t2 - t1).count() << " ns" << std::endl;
-    std::cout << " FPGA time: +t1 " << std::chrono::duration_cast<std::chrono::nanoseconds>(t1a - t1).count() << " ns" << std::endl;
-    std::cout << " FPGA time: +inf" << std::chrono::duration_cast<std::chrono::nanoseconds>(t1b - t1).count() << " ns" << std::endl;
-    std::cout << " FPGA time: +t2" << std::chrono::duration_cast<std::chrono::nanoseconds>(t1c - t1).count() << " ns" << std::endl;
+    //std::cout << "Total time: " << std::chrono::duration_cast<std::chrono::nanoseconds>(t3  - t0).count() << " ns" << std::endl;
+    //std::cout << "   T1 time: " << std::chrono::duration_cast<std::chrono::nanoseconds>(t1  - t0).count() << " ns" << std::endl;
+    //std::cout << "   T2 time: " << std::chrono::duration_cast<std::chrono::nanoseconds>(t3  - t2).count() << " ns" << std::endl;
+    //std::cout << " FPGA time: " << std::chrono::duration_cast<std::chrono::nanoseconds>(t2  - t1a).count() << " ns" << std::endl;
+    //std::cout << " FPGA time: t1  " << std::chrono::duration_cast<std::chrono::nanoseconds>(t1b - t1a).count() << " ns" << std::endl;
+    //std::cout << " FPGA time: inf " << std::chrono::duration_cast<std::chrono::nanoseconds>(t1c - t1b).count() << " ns" << std::endl;
+    //std::cout << " FPGA time: t2  " << std::chrono::duration_cast<std::chrono::nanoseconds>(t2  - t1c).count() << " ns" << std::endl;
     return grpc::Status::OK;
   } 
 };
