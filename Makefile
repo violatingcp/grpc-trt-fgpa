@@ -45,7 +45,7 @@ CXXFLAGS += -std=c++11
 GRPC_CPP_PLUGIN = grpc_cpp_plugin
 GRPC_CPP_PLUGIN_PATH ?= `which $(GRPC_CPP_PLUGIN)`
 
-all: server client
+all: server client 
 
 xcl2.o: $(xcl2_SRCS) $(xcl2_HDRS)
 	$(CXX) $(CXXFLAGS) $(CPPFLAGS) -c -o $@ $<
@@ -56,6 +56,9 @@ client: api.pb.o model_config.pb.o request_status.pb.o server_status.pb.o grpc_s
 server: api.pb.o model_config.pb.o request_status.pb.o server_status.pb.o grpc_service.pb.o api.grpc.pb.o model_config.grpc.pb.o request_status.grpc.pb.o server_status.grpc.pb.o grpc_service.grpc.pb.o server.o xcl2.o
 	$(CXX) $^ $(LDFLAGS) -o $@
 
+server_nofpga: api.pb.o model_config.pb.o request_status.pb.o server_status.pb.o grpc_service.pb.o api.grpc.pb.o model_config.grpc.pb.o request_status.grpc.pb.o server_status.grpc.pb.o grpc_service.grpc.pb.o server_nofgpa.o xcl2.o
+	$(CXX) $^ $(LDFLAGS) -o $@
+
 %.grpc.pb.cc: %.proto
 	protoc --grpc_out=. --plugin=protoc-gen-grpc=$(GRPC_CPP_PLUGIN_PATH) $<
 
@@ -63,4 +66,4 @@ server: api.pb.o model_config.pb.o request_status.pb.o server_status.pb.o grpc_s
 	protoc --cpp_out=. $<
 
 clean:
-	rm -f *.o *.pb.cc *.pb.h server
+	rm -f *.o *.pb.cc *.pb.h server server_nofpga
